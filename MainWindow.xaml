@@ -1,0 +1,601 @@
+﻿<Window
+    x:Class="Pixelator.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Pixelator"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="clr-namespace:Pixelator.UserControls"
+    Title="Pixelator"
+    Width="1440"
+    Height="800"
+    MinWidth="1400px"
+    MinHeight="500px"
+    AllowsTransparency="True"
+    Icon="/ICOase.png"
+    MouseLeftButtonDown="Window_MouseDown"
+    ResizeMode="CanResizeWithGrip"
+    SizeChanged="Window_SizeChanged"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <SolidColorBrush x:Key="ImageContextMenuItemBorder" Color="Black" />
+        <SolidColorBrush
+            x:Key="ContextMenuItemBackColor"
+            Opacity="0.6"
+            Color="Black" />
+        <ImageBrush x:Key="hCloseButton" ImageSource="/Assets/TaskbarButtons/btnCloseHover.jpg" />
+        <ImageBrush x:Key="hMinimizeButton" ImageSource="/Assets/TaskbarButtons/btnMinimizeHover.jpg" />
+        <ImageBrush x:Key="hMinMaxButton" ImageSource="/Assets/TaskbarButtons/btnMinMaxHover.jpg" />
+        <ImageBrush x:Key="pCloseButton" ImageSource="/Assets/TaskbarButtons/btnClosePressed.jpg" />
+        <ImageBrush x:Key="pMinimizeButton" ImageSource="/Assets/TaskbarButtons/btnMinimizePressed.jpg" />
+        <ImageBrush x:Key="pMinMaxButton" ImageSource="/Assets/TaskbarButtons/btnMinMaxPressed.jpg" />
+        <!--#region Minimize button style-->
+        <Style x:Key="FocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle
+                            Margin="2"
+                            SnapsToDevicePixels="true"
+                            Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                            StrokeDashArray="1 2"
+                            StrokeThickness="1" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background" Color="#FFDDDDDD" />
+        <SolidColorBrush x:Key="Button.Static.Border" Color="#FF707070" />
+        <SolidColorBrush x:Key="Button.MouseOver.Background" Color="#FFBEE6FD" />
+        <SolidColorBrush x:Key="Button.MouseOver.Border" Color="#FF3C7FB1" />
+        <SolidColorBrush x:Key="Button.Pressed.Background" Color="#FFC4E5F6" />
+        <SolidColorBrush x:Key="Button.Pressed.Border" Color="#FF2C628B" />
+        <SolidColorBrush x:Key="Button.Disabled.Background" Color="#FFF4F4F4" />
+        <SolidColorBrush x:Key="Button.Disabled.Border" Color="#FFADB2B5" />
+        <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#FF838383" />
+        <Style x:Key="btnMinimizeStyle" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}" />
+            <Setter Property="Background" Value="{StaticResource Button.Static.Background}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Button.Static.Border}" />
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border
+                            x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="true">
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Focusable="False"
+                                RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource hMinimizeButton}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.MouseOver.Border}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource pMinimizeButton}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Pressed.Border}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource Button.Disabled.Background}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Disabled.Border}" />
+                                <Setter TargetName="contentPresenter" Property="TextElement.Foreground" Value="{StaticResource Button.Disabled.Foreground}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--#endregion-->
+        <!--#region Minimize/Maximize button style-->
+        <Style x:Key="FocusVisual1">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle
+                            Margin="2"
+                            SnapsToDevicePixels="true"
+                            Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                            StrokeDashArray="1 2"
+                            StrokeThickness="1" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background1" Color="#FFDDDDDD" />
+        <SolidColorBrush x:Key="Button.Static.Border1" Color="#FF707070" />
+        <SolidColorBrush x:Key="Button.MouseOver.Background1" Color="#FFBEE6FD" />
+        <SolidColorBrush x:Key="Button.MouseOver.Border1" Color="#FF3C7FB1" />
+        <SolidColorBrush x:Key="Button.Pressed.Background1" Color="#FFC4E5F6" />
+        <SolidColorBrush x:Key="Button.Pressed.Border1" Color="#FF2C628B" />
+        <SolidColorBrush x:Key="Button.Disabled.Background1" Color="#FFF4F4F4" />
+        <SolidColorBrush x:Key="Button.Disabled.Border1" Color="#FFADB2B5" />
+        <SolidColorBrush x:Key="Button.Disabled.Foreground1" Color="#FF838383" />
+        <Style x:Key="MinMaxButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual1}" />
+            <Setter Property="Background" Value="{StaticResource Button.Static.Background1}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Button.Static.Border1}" />
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border
+                            x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="true">
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Focusable="False"
+                                RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource hMinMaxButton}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.MouseOver.Border1}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource pMinMaxButton}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Pressed.Border1}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource Button.Disabled.Background1}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Disabled.Border1}" />
+                                <Setter TargetName="contentPresenter" Property="TextElement.Foreground" Value="{StaticResource Button.Disabled.Foreground1}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--#endregion-->
+        <!--#region Close button style-->
+        <Style x:Key="FocusVisual2">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Rectangle
+                            Margin="2"
+                            SnapsToDevicePixels="true"
+                            Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
+                            StrokeDashArray="1 2"
+                            StrokeThickness="1" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <SolidColorBrush x:Key="Button.Static.Background2" Color="#FFDDDDDD" />
+        <SolidColorBrush x:Key="Button.Static.Border2" Color="#FF707070" />
+        <SolidColorBrush x:Key="Button.MouseOver.Background2" Color="#FFBEE6FD" />
+        <SolidColorBrush x:Key="Button.MouseOver.Border2" Color="#FF3C7FB1" />
+        <SolidColorBrush x:Key="Button.Pressed.Background2" Color="#FFC4E5F6" />
+        <SolidColorBrush x:Key="Button.Pressed.Border2" Color="#FF2C628B" />
+        <SolidColorBrush x:Key="Button.Disabled.Background2" Color="#FFF4F4F4" />
+        <SolidColorBrush x:Key="Button.Disabled.Border2" Color="#FFADB2B5" />
+        <SolidColorBrush x:Key="Button.Disabled.Foreground2" Color="#FF838383" />
+        <Style x:Key="CloseButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual2}" />
+            <Setter Property="Background" Value="{StaticResource Button.Static.Background2}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Button.Static.Border2}" />
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border
+                            x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            SnapsToDevicePixels="true">
+                            <ContentPresenter
+                                x:Name="contentPresenter"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Focusable="False"
+                                RecognizesAccessKey="True"
+                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsDefaulted" Value="true">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource hCloseButton}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.MouseOver.Border2}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="true">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource pCloseButton}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Pressed.Border2}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource Button.Disabled.Background2}" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource Button.Disabled.Border2}" />
+                                <Setter TargetName="contentPresenter" Property="TextElement.Foreground" Value="{StaticResource Button.Disabled.Foreground2}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--#endregion-->
+
+        <Style x:Key="ImageContextMenuTemplate" TargetType="{x:Type ContextMenu}">
+            <Setter Property="Background" Value="{DynamicResource ContextMenuItemBackColor}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontFamily" Value="8-bit Operator+ 8" />
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ImageContextMenuItemBorder}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Border Uid="Border_93">
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="Tag" Value="{DynamicResource {x:Static SystemParameters.DropShadowKey}}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="Padding" Value="0,0,5,5" />
+                                            <Setter Property="Effect">
+                                                <Setter.Value>
+                                                    <DropShadowEffect
+                                                        BlurRadius="4"
+                                                        Opacity="0.8"
+                                                        ShadowDepth="1" />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ContextMenu}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Border
+                            BorderBrush="{StaticResource ImageContextMenuItemBorder}"
+                            BorderThickness="1"
+                            CornerRadius="10">
+                            <StackPanel Margin="2" IsItemsHost="True" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--#region Tool Description Storyboards-->
+        <Storyboard x:Key="StoryboardVisible">
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DescriptionPanel" Storyboard.TargetProperty="Visibility">
+                <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}" />
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+
+        <Storyboard x:Key="StoryboardCollapsed">
+            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="DescriptionPanel" Storyboard.TargetProperty="Visibility">
+                <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Collapsed}" />
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+        <!--#endregion-->
+
+    </Window.Resources>
+
+    <Border
+        x:Name="MaximizeBorder"
+        BorderBrush="Black"
+        BorderThickness="0">
+        <Grid x:Name="MainGrid">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Name="TitleBar" Height="32px" />
+                <RowDefinition x:Name="WorkspaceRowArea" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="32px" />
+                <ColumnDefinition Width="200px" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <!--  All the background colors in the main app window  -->
+            <Rectangle
+                x:Name="ToolsBackground"
+                Grid.Row="1"
+                Grid.Column="0"
+                Fill="#242424" />
+            <Rectangle
+                x:Name="WorkspaceBackground"
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                AllowDrop="True"
+                Drop="WorkspaceBackground_Drop"
+                MouseLeftButtonDown="WorkspaceBackground_FolderDialogBrowser">
+                <Rectangle.Style>
+                    <Style TargetType="{x:Type Rectangle}">
+                        <Setter Property="Fill" Value="#2B2B2B" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="Fill.Color"
+                                                To="#9747FF"
+                                                Duration="0:0:0.25" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetProperty="Fill.Color"
+                                                To="#2B2B2B"
+                                                Duration="0:0:0.25" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+            <Rectangle
+                Grid.Row="0"
+                Grid.ColumnSpan="3"
+                Fill="#515151" />
+
+            <!--  App ICON n Name  -->
+            <Image
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="4,4,4,4"
+                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                RenderOptions.EdgeMode="Aliased"
+                Source="/32ICON.png"
+                Stretch="Fill" />
+            <TextBlock
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                FontFamily="8-bit Operator+ 8"
+                FontSize="18">
+                <TextBlock.Text>
+                    Pixelator
+                </TextBlock.Text>
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Foreground" Value="#CCCDCE" />
+                        <Setter Property="Width" Value="100px" />
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <!--  TaskBar Buttons and file name  -->
+            <Grid
+                Grid.Row="0"
+                Grid.Column="2"
+                HorizontalAlignment="Right">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="32px" />
+                    <ColumnDefinition Width="32px" />
+                    <ColumnDefinition Width="32px" />
+                </Grid.ColumnDefinitions>
+                <TextBox
+                    x:Name="FilenameTextBox"
+                    Grid.Column="0"
+                    Margin="0,0,10,0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    BorderBrush="{x:Null}"
+                    FontFamily="8-bit Operator+"
+                    FontSize="18"
+                    Foreground="#CCCDCE"
+                    IsEnabled="False"
+                    IsReadOnly="True"
+                    Text="{Binding Text}" />
+                <Button
+                    x:Name="ButtonMinimize"
+                    Grid.Column="1"
+                    BorderThickness="0,0,0,0"
+                    Click="ButtonMinimize_Click"
+                    Style="{DynamicResource btnMinimizeStyle}">
+                    <Button.Background>
+                        <ImageBrush ImageSource="/Assets/TaskbarButtons/btnMinimizeDefault.jpg" />
+                    </Button.Background>
+                </Button>
+                <Button
+                    x:Name="ButtonMinMax"
+                    Grid.Column="2"
+                    BorderThickness="0,0,0,0"
+                    Click="ButtonMinMax_Click"
+                    Style="{DynamicResource MinMaxButtonStyle}">
+                    <Button.Background>
+                        <ImageBrush ImageSource="/Assets/TaskbarButtons/btnMinMaxDefault.jpg" />
+                    </Button.Background>
+                </Button>
+                <Button
+                    x:Name="ButtonClose"
+                    Grid.Column="3"
+                    BorderThickness="0,0,0,0"
+                    Click="ButtonClose_Click"
+                    Style="{DynamicResource CloseButtonStyle}">
+                    <Button.Background>
+                        <ImageBrush ImageSource="/Assets/TaskbarButtons/btnCloseDefault.jpg" />
+                    </Button.Background>
+                </Button>
+            </Grid>
+
+            <!--  Image and text to insert image  -->
+            <Image
+                x:Name="InsertPicture"
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                Width="80"
+                Height="80"
+                Margin="0,0,0,128"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                Source="/Assets/Pictures/InsertImagePicture.png" />
+            <TextBlock
+                x:Name="InsertText"
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                FontFamily="8-bit Operator+ 8"
+                FontSize="24"
+                Foreground="White">
+                <TextBlock.Text>
+                    Click or CTRL + V to insert image
+                </TextBlock.Text>
+            </TextBlock>
+
+            <!--  Image Region  -->
+            <Rectangle
+                x:Name="imageRectangle"
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="2"
+                Width="{Binding ActualWidth, ElementName=MainGrid}"
+                Height="{Binding ActualHeight, ElementName=MainGrid}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                IsEnabled="True"
+                IsHitTestVisible="False">
+                <Rectangle.Fill>
+                    <ImageBrush x:Name="ImageToPixelate" />
+                </Rectangle.Fill>
+                <Rectangle.ContextMenu>
+                    <ContextMenu>
+                        <Border CornerRadius="5">
+                            <StackPanel>
+                                <MenuItem Header="Clear" />
+                                <MenuItem Header="Put Image" />
+                                <MenuItem Header="Copy From Buffer" />
+                            </StackPanel>
+                        </Border>
+                    </ContextMenu>
+                </Rectangle.ContextMenu>
+            </Rectangle>
+
+            <!--  Tools Grid n Definitions  -->
+            <Grid Grid.Row="1" Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32px" />
+                    <RowDefinition Height="32px" />
+                </Grid.RowDefinitions>
+                <Border CornerRadius="7,7,7,7">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="1,0" EndPoint="0,1">
+                            <GradientStop Color="#FF00D344" />
+                            <GradientStop Offset="1" Color="#FFCF0530" />
+                            <GradientStop Offset="0.5" Color="#FF001BFE" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="BorderThickness" Value="4,4,4,4" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderThickness" Value="0,0,0,0" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Image
+                        x:Name="PixelateTool"
+                        Grid.Row="0"
+                        MouseEnter="PixelateTool_MouseEnter"
+                        MouseLeave="PixelateTool_MouseLeave"
+                        MouseLeftButtonDown="PixelateTool_MouseLeftButtonDown"
+                        RenderOptions.BitmapScalingMode="HighQuality"
+                        Source="/Assets/Pictures/PixelateToolIcon.png" />
+                </Border>
+                <Border
+                    Grid.Row="1"
+                    BorderBrush="Transparent"
+                    CornerRadius="10">
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}">
+                            <Setter Property="BorderThickness" Value="8" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="BorderThickness" Value="4" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Image
+                        x:Name="ProcessIcon"
+                        MouseLeftButtonDown="ProcessIcon_MouseLeftButtonDown"
+                        RenderOptions.BitmapScalingMode="HighQuality"
+                        Visibility="Collapsed" />
+                </Border>
+            </Grid>
+
+            <!--  Tool description element  -->
+            <StackPanel
+                x:Name="DescriptionPanel"
+                Grid.Row="1"
+                Grid.Column="1"
+                Height="Auto"
+                VerticalAlignment="Top"
+                Orientation="Vertical"
+                Visibility="Collapsed">
+                <uc:ToolDescriptionControl x:Name="DescriptionControl" Margin="5,5" />
+                <uc:CustomSlider
+                    x:Name="CustomSlider"
+                    Margin="5,5"
+                    ButtonClicked="CustomSlider_OnButtonClicked"
+                    Visibility="Hidden" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

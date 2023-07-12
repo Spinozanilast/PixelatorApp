@@ -1,0 +1,248 @@
+﻿<UserControl
+    x:Class="Pixelator.UserControls.CustomSlider"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <Style x:Key="BaseFontStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="8-bit Operator+ 8" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+        <Style x:Key="SliderRepeatButtonRight" TargetType="RepeatButton">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="IsTabStop" Value="false" />
+            <Setter Property="Focusable" Value="false" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border
+                            Name="PART_Border"
+                            Width="{TemplateBinding Width}"
+                            Height="{TemplateBinding Height}"
+                            Padding="2"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0, 1" EndPoint="1, 0">
+                                    <GradientStop Offset="0" Color="#39BE46" />
+                                    <GradientStop Offset="0.5" Color="#1D2AA3" />
+                                    <GradientStop Offset="1" Color="#9D2C2C" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SliderRepeatButtonLeft" TargetType="RepeatButton">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border
+                            Name="PART_Border"
+                            Width="{TemplateBinding Width}"
+                            Height="{TemplateBinding Height}"
+                            Padding="2"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            BorderBrush="Transparent"
+                            BorderThickness="1"
+                            CornerRadius="2">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0, 1" EndPoint="1, 0">
+                                    <GradientStop Offset="0" Color="#00FF1A" />
+                                    <GradientStop Offset="0.5" Color="#001AFF" />
+                                    <GradientStop Offset="1" Color="#FF0000" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SliderThumbStyle" TargetType="Thumb">
+            <Setter Property="SnapsToDevicePixels" Value="true" />
+            <Setter Property="OverridesDefaultStyle" Value="false" />
+            <Setter Property="Height" Value="Auto" />
+            <Setter Property="Width" Value="Auto" />
+            <Setter Property="MinWidth" Value="10" />
+            <Setter Property="MinWidth" Value="15" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border Name="Ellipse" CornerRadius="1.5">
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0, 1" EndPoint="1, 0">
+                                    <GradientStop Offset="0" Color="#00FF1A" />
+                                    <GradientStop Offset="0.5" Color="#001AFF" />
+                                    <GradientStop Offset="1" Color="#FF0000" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <Label
+                                x:Name="ThumbLabel"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Content="{Binding Value, RelativeSource={RelativeSource AncestorType=Slider}}"
+                                FontFamily="8-bit Operator+ SC"
+                                FontSize="10"
+                                FontWeight="Bold"
+                                Foreground="White" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Ellipse" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0, 1" EndPoint="1, 0">
+                                            <GradientStop Offset="1" Color="#00FF1A" />
+                                            <GradientStop Offset="0.5" Color="#001AFF" />
+                                            <GradientStop Offset="0" Color="#FF0000" />
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="Ellipse" Property="Background" Value="#515151" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AppSliderStyle" TargetType="Slider">
+            <Setter Property="OverridesDefaultStyle" Value="true" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Name="row" Height="auto" />
+                                <RowDefinition Height="auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Name="column" Width="*" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+                            <Border
+                                Name="PART_Border"
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}"
+                                Padding="2"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                BorderBrush="Transparent"
+                                BorderThickness="1"
+                                CornerRadius="2" />
+                            <Track
+                                Name="PART_Track"
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center">
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource SliderThumbStyle}" />
+                                </Track.Thumb>
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource SliderRepeatButtonLeft}" />
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource SliderRepeatButtonRight}" />
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="UcButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="10,5" />
+            <Setter Property="Height" Value="30px" />
+            <Setter Property="Background" Value="#80000000" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Content" Value="Make changes" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="8-bit Operator+ 8" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="Black"
+                            BorderThickness="1"
+                            CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#9747FF" />
+                    <Setter Property="Foreground" Value="Black" />
+                </Trigger>
+                <DataTrigger Binding="{Binding IsPressed, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Background" Value="#6F00FF"/>
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50*" />
+            <ColumnDefinition Width="50*" />
+        </Grid.ColumnDefinitions>
+        <TextBlock
+            x:Name="SliderPropertyName"
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Style="{StaticResource BaseFontStyle}" />
+        <Slider
+            x:Name="Slider"
+            Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Cursor="Hand"
+            IsSnapToTickEnabled="True"
+            LargeChange="2"
+            Maximum="100"
+            SmallChange="1"
+            Style="{StaticResource AppSliderStyle}"
+            ValueChanged="Slider_ValueChanged" />
+        <Button
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Style="{StaticResource UcButtonStyle}" Click="Button_Click" />
+    </Grid>
+
+</UserControl>
